@@ -1,0 +1,11 @@
+---
+import { testData } from "testdata";
+import Entry from "../components/Entry.astro";
+const entries = await testData()
+---
+<main>
+	<table>
+	  { entries.map(entry => <Entry {entry} />)}
+	</table>
+</main>
+  

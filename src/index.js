@@ -4,11 +4,15 @@ import { buildRemixHandler } from "./remix.js";
 import { buildNextHandler, buildNextPagesHandler } from "./next.js";
 import { buildNuxtHandler } from "./nuxt.js";
 import { buildSveltekitHandler } from "./svelte.js";
+import { buildAstroHandler } from "./astro.js";
 import http from "node:http";
 import { getDuplicationFactor, logResultsTable } from "./result-format.js";
 
 export async function run(handler, collect = false) {
   const request = new IncomingMessage();
+  // fix for astro
+  request.socket = [];
+
   const response = new ServerResponse(request, collect);
 
   handler(request, response);
@@ -17,9 +21,10 @@ export async function run(handler, collect = false) {
   return response;
 }
 
-const bench = new Bench({ time: 10_000 });
+const bench = new Bench({ time: 10 });
 
 const handlers = [
+  { name: "astro", handler: await buildAstroHandler() },
   {
     name: "solid",
     handler: await import("solid-benchmark").then((x) => x.buildHandler()),
@@ -32,10 +37,10 @@ const handlers = [
     name: "vue",
     handler: await import("vue-benchmark").then((x) => x.buildHandler()),
   },
-  {
-    name: "mfng",
-    handler: await import("mfng-benchmark").then((x) => x.buildHandler()),
-  },
+  // {
+  //   name: "mfng",
+  //   handler: await import("mfng-benchmark").then((x) => x.buildHandler()),
+  // },
   { name: "remix", handler: await buildRemixHandler() },
   { name: "next", handler: await buildNextHandler() },
   { name: "next-pages", handler: await buildNextPagesHandler() },
